@@ -1,5 +1,6 @@
 import argparse
 import os
+from os import PathLike
 
 import cv2
 
@@ -33,15 +34,36 @@ def blur_image(image_path, kernel_size, sigma):
 
     blurred_image = cv2.GaussianBlur(image, [kernel_size, kernel_size], sigma)
 
-    basename_with_extension = os.path.basename(image_path)
-    basename, extension = os.path.splitext(basename_with_extension)
-    output_name = basename +"_blur" + extension
 
-    directory = os.path.dirname(image_path)
-    output_path = os.path.join(directory, output_name)
+
+    output_path = get_new_filename(image_path)
 
     cv2.imwrite(str(output_path), blurred_image)
     print(output_path)
+
+
+def get_new_filename(image_path):
+    filename_with_extension = os.path.basename(image_path)
+    filename, extension = os.path.splitext(filename_with_extension)
+    output_filename = "blur_"+filename + extension
+
+    base_directory = os.path.dirname(image_path)
+    output_path = os.path.join(base_directory, output_filename)
+
+    if not os.path.exists(output_path):
+        return output_path
+
+
+    # in case of duplicates
+    counter = 1
+    while os.path.exists(output_path):
+        new_filename = f"blur_{filename}({counter})" + extension
+        output_path = os.path.join(base_directory, new_filename)
+        counter += 1
+
+
+    return output_path
+
 
 
 
