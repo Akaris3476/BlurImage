@@ -1,28 +1,45 @@
 import argparse
 import os
-from os import PathLike
-
 import cv2
 
-# WIP
+
 def blur_folder(folder, kernel_size, sigma):
-    print("Processing folder {}".format(folder))
-    # for filename in os.listdir(folder)
-    #
-    # print(image)
+
+    if folder is None:
+        print("Folder not provided. Invalid argument")
+        exit(1)
+
+    if not os.path.exists(folder):
+        print("Folder not found. Invalid argument")
+        exit(1)
+
+
+    blurred_folder = folder +"/blur"
+    if not os.path.exists(blurred_folder):
+        os.makedirs(blurred_folder)
+
+
+    for filename in os.listdir(folder):
+        image_path = folder + "/" + filename
+        image = cv2.imread(image_path)
+
+        try:
+            blurred_image = cv2.GaussianBlur(image, [kernel_size, kernel_size], sigma)
+        except cv2.error as e:
+            print(filename + " is not an image. File wasn't blurred")
+            continue
+
+        output_path = get_path_with_updated_filename(image_path, blurred_folder)
+        cv2.imwrite(str(output_path), blurred_image)
+        print(output_path)
+
+
 
 
 def blur_image(image_path, kernel_size, sigma):
 
     if image_path is None:
         print("Image path is not provided. Invalid argument")
-        exit(1)
-
-    if kernel_size % 2 == 0:
-        print("Kernel size must be odd. Invalid argument")
-        exit(1)
-    if kernel_size < 0:
-        print("Kernel size must be positive. Invalid argument")
         exit(1)
 
     if not os.path.exists(image_path):
@@ -34,20 +51,24 @@ def blur_image(image_path, kernel_size, sigma):
 
     blurred_image = cv2.GaussianBlur(image, [kernel_size, kernel_size], sigma)
 
-
-
-    output_path = get_new_filename(image_path)
+    output_path = get_path_with_updated_filename(image_path)
 
     cv2.imwrite(str(output_path), blurred_image)
     print(output_path)
 
 
-def get_new_filename(image_path):
+
+def get_path_with_updated_filename(image_path, subfolder_path=None):
     filename_with_extension = os.path.basename(image_path)
     filename, extension = os.path.splitext(filename_with_extension)
-    output_filename = "blur_"+filename + extension
+    output_filename = filename+"_blur" + extension
 
-    base_directory = os.path.dirname(image_path)
+
+    if subfolder_path is not None:
+        base_directory = subfolder_path
+    else:
+        base_directory = os.path.dirname(image_path)
+
     output_path = os.path.join(base_directory, output_filename)
 
     if not os.path.exists(output_path):
@@ -57,14 +78,12 @@ def get_new_filename(image_path):
     # in case of duplicates
     counter = 1
     while os.path.exists(output_path):
-        new_filename = f"blur_{filename}({counter})" + extension
+        new_filename = f"{filename}_blur({counter})" + extension
         output_path = os.path.join(base_directory, new_filename)
         counter += 1
 
 
     return output_path
-
-
 
 
 
@@ -81,6 +100,13 @@ def main():
 
 
     args = arg_parser.parse_args()
+
+    if args.kernel_size % 2 == 0:
+        print("Kernel size must be odd. Invalid argument")
+        exit(1)
+    if args.kernel_size < 0:
+        print("Kernel size must be positive. Invalid argument")
+        exit(1)
 
 
     if args.folder:
