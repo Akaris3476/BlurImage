@@ -93,10 +93,10 @@ def main():
     arg_parser = argparse.ArgumentParser(description='Applies gaussian blur to image or folder of images. '
                                                      'Result is saved in the same folder as image')
 
-    arg_parser.add_argument('--folder', '-f', type=str, default=None, help='Will process all images in specified folder. WIP')
+    arg_parser.add_argument('--folder', '-f', type=str, default=None, help='Will process all images in specified folder')
     arg_parser.add_argument( "image", nargs='?' , type=str, help='Specifies image to blur')
     arg_parser.add_argument( "kernel_size", type=int, help='Kernel size of gaussian blur')
-    arg_parser.add_argument( "sigma", type=int, help='Sigma of blur')
+    arg_parser.add_argument( "sigma", type=float, help='Sigma of blur')
 
 
     args = arg_parser.parse_args()
